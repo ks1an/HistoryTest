@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using Random = UnityEngine.Random;
 
 public class GameScript : MonoBehaviour
@@ -10,30 +11,40 @@ public class GameScript : MonoBehaviour
     public static event Action ActionGameStarted;
     public static event Action ActionGameEnded;
 
-    #region UI
-    [SerializeField] private QuestionList[] _questions;
+    [SerializeField] private CategoryList[] _category = new CategoryList[2];
+    [SerializeField] private Text _qCategoryText; 
     [SerializeField] private Text _qText;
 
     [Header("Answer Buttons")]
     [SerializeField] private Button[] _answerBttns = new Button[4];
-    [SerializeField] private Text[] _answersText;
+    [SerializeField] private TextMeshProUGUI[] _answersText;
     [SerializeField] private Sprite _defaultAnswerBttnSprite;
     [SerializeField] private Sprite _trueAnswerBttnSprite;
     [SerializeField] private Sprite _falseAnswerBttnSprite;
-    #endregion
 
     private List<object> _qList;
     private QuestionList _curQ;
     private int _randQ;
     private int _trueAnswerIndex;
     private int _falseAnswerIndex;
+    private int _selectCategory = 0;
 
     public void OnClickPlay()
     {
-        _qList = new List<object>(_questions);
+        _qList = new List<object>(_category[_selectCategory].questions);
 
         QuestionGenerate();
         ActionGameStarted?.Invoke();
+    }
+
+    public void SelectCategory(int index)
+    {
+        if (index < 0)
+        {
+            _selectCategory = Random.Range(0, _category.Length);
+        }
+        else
+          _selectCategory = index;
     }
 
     private void QuestionGenerate()
@@ -46,6 +57,8 @@ public class GameScript : MonoBehaviour
             _randQ = Random.Range(0, _qList.Count);
             _curQ = _qList[_randQ] as QuestionList;
             _qText.text = _curQ.question;
+            _qCategoryText.text = _category[_selectCategory].nameOfCategory;
+
             List<string> _answers = new List<string>(_curQ.answers);
 
             for (int i = 0; i < _curQ.answers.Length; i++)
@@ -163,4 +176,11 @@ public class QuestionList
 {
     public string question;
     public string[] answers = new string[4];
+}
+
+[System.Serializable]
+public class CategoryList
+{
+    public string nameOfCategory;
+    public QuestionList[] questions; 
 }

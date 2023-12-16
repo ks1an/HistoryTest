@@ -60,8 +60,9 @@
   <ItemGroup>
     <Compile Include="Assets\Scripts\UI\MenuUI.cs" />
     <Compile Include="Assets\Scripts\UGS_Analytics.cs" />
-    <Compile Include="Assets\Scripts\UI\QPanel\qPanelAnimToEvent.cs" />
+    <Compile Include="Assets\Scripts\UI\QPanel\qCategoryName.cs" />
     <Compile Include="Assets\Scripts\UI\QPanel\QPanelUI.cs" />
+    <Compile Include="Assets\Scripts\UI\QPanel\qBackground.cs" />
     <Compile Include="Assets\Scripts\GameScript.cs" />
   </ItemGroup>
   <ItemGroup>
