@@ -24,5 +24,4 @@ public class MenuUI : MonoBehaviour
     {
         _menuCore.SetActive(false);
     }
-
 }
