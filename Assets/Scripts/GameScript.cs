@@ -8,8 +8,10 @@ using Random = UnityEngine.Random;
 
 public class GameScript : MonoBehaviour
 {
+    #region events
     public static event Action ActionGameStarted;
     public static event Action ActionGameEnded;
+    #endregion
 
     [SerializeField] private CategoryList[] _category = new CategoryList[2];
     [SerializeField] private Text _qCategoryText; 
@@ -22,17 +24,23 @@ public class GameScript : MonoBehaviour
     [SerializeField] private Sprite _trueAnswerBttnSprite;
     [SerializeField] private Sprite _falseAnswerBttnSprite;
 
+    [SerializeField] private QProgressBar _qProgressBar;
+
     private List<object> _qList;
     private QuestionList _curQ;
     private int _randQ;
     private int _trueAnswerIndex;
     private int _falseAnswerIndex;
     private int _selectCategory = 0;
+    private int _qLimit = 10;
+    private int _qCounter = 0;
 
-    public void OnClickPlay()
+    public void OnClickPlay(int qLimit)
     {
         _qList = new List<object>(_category[_selectCategory].questions);
-
+        _qLimit = qLimit;
+        _qCounter = 0;
+        
         QuestionGenerate();
         ActionGameStarted?.Invoke();
     }
@@ -40,17 +48,17 @@ public class GameScript : MonoBehaviour
     public void SelectCategory(int index)
     {
         if (index < 0)
-        {
             _selectCategory = Random.Range(0, _category.Length);
-        }
         else
-          _selectCategory = index;
+            _selectCategory = index;
     }
 
     private void QuestionGenerate()
     {
-        if(_qList.Count > 0)
+        if(_qList.Count > 0 && _qCounter <= _qLimit)
         {
+            ++_qCounter;
+
             _trueAnswerIndex = -2;
             _falseAnswerIndex = -2;
 
@@ -79,7 +87,8 @@ public class GameScript : MonoBehaviour
         }
         else
         {
-            Debug.Log("Вопросы закончились");
+            Debug.Log("Questions have ended or the limit has been reached! \n" 
+                + "qLimit: " + _qLimit + " qCounter: " + _qCounter + " qList.Count: " + _qList.Count);
             GameEnd();
         }
     }
@@ -154,6 +163,7 @@ public class GameScript : MonoBehaviour
         }
         else
         {
+            _qProgressBar.IncrementProgress((float)_qLimit / 100);
             yield return new WaitForSeconds(1);
         }
 

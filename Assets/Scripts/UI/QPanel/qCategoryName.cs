@@ -1,8 +1,11 @@
+using System;
 using System.Collections;
 using UnityEngine;
 
-public class qCategoryName : MonoBehaviour
+public class QCategoryName : MonoBehaviour
 {
+    public static event Action ActionQCategoryAnimEnded;
+
     public void AnimationInEnd()
     {
         StartCoroutine(TemporaryDisplay());
@@ -10,6 +13,7 @@ public class qCategoryName : MonoBehaviour
 
     public void AnimationOutEnd()
     {
+        ActionQCategoryAnimEnded?.Invoke();
         this.gameObject.SetActive(false);
     }
 
