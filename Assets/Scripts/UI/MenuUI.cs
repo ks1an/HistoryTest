@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class MenuUI : MonoBehaviour
 {
-    [SerializeField] private GameObject _menuCore;
+    [SerializeField] private GameObject _menu;
 
     private void OnEnable()
     {
@@ -17,11 +17,11 @@ public class MenuUI : MonoBehaviour
 
     private void MenuEnable()
     {
-        _menuCore.SetActive(true);
+        _menu.SetActive(true);
     }
 
     private void MenuDisable()
     {
-        _menuCore.SetActive(false);
+        _menu.SetActive(false);
     }
 }

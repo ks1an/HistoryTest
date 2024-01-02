@@ -2,10 +2,14 @@ using UnityEngine;
 
 public class QPanelUI : MonoBehaviour
 {
-    [SerializeField] private GameObject _qPanelCore;
+    [SerializeField] private GameObject _qPanel;
     [SerializeField] private GameObject _qCategoryName;
     [SerializeField] private GameObject _qProgressBar;
 
+    private void Start()
+    {
+        _qPanel.SetActive(false);
+    }
 
     private void OnEnable()
     {
@@ -23,8 +27,8 @@ public class QPanelUI : MonoBehaviour
 
     private void QPanelEnable()
     {
-        _qPanelCore.SetActive(true);
-        _qPanelCore.GetComponent<Animator>().SetTrigger("in");
+        _qPanel.SetActive(true);
+        _qPanel.GetComponent<Animator>().SetTrigger("in");
 
         _qCategoryName.SetActive(true);
         _qCategoryName.GetComponent<Animator>().SetTrigger("in");
@@ -35,7 +39,7 @@ public class QPanelUI : MonoBehaviour
     private void QPanelDisable()
     {
         _qProgressBar.GetComponent<Animator>().SetTrigger("out");
-        _qPanelCore.GetComponent<Animator>().SetTrigger("out");
+        _qPanel.GetComponent<Animator>().SetTrigger("out");
     }
 
     private void QProgressBarEnable()
