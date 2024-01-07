@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using Random = UnityEngine.Random;
+using Unity.Services.Analytics;
 
 public class GameScript : MonoBehaviour
 {
@@ -14,7 +15,7 @@ public class GameScript : MonoBehaviour
     #endregion
 
     [SerializeField] private CategoryList[] _category = new CategoryList[2];
-    [SerializeField] private Text _qCategoryText; 
+    [SerializeField] private TextMeshProUGUI _qCategoryText; 
     [SerializeField] private Text _qText;
 
     [Header("Answer Buttons")]
@@ -40,7 +41,10 @@ public class GameScript : MonoBehaviour
         _qList = new List<object>(_category[_selectCategory].questions);
         _qLimit = qLimit;
         _qCounter = 0;
-        
+
+        for (int i = 0; i < _answerBttns.Length; i++)
+            _answerBttns[i].gameObject.SetActive(false);
+
         QuestionGenerate();
         ActionGameStarted?.Invoke();
     }
@@ -89,6 +93,7 @@ public class GameScript : MonoBehaviour
         {
             Debug.Log("Questions have ended or the limit has been reached! \n" 
                 + "qLimit: " + _qLimit + " qCounter: " + _qCounter + " qList.Count: " + _qList.Count);
+
             GameEnd();
         }
     }
@@ -101,21 +106,16 @@ public class GameScript : MonoBehaviour
             _answerBttns[i].interactable = false;
 
         int a = 0;
-        while(a < _answerBttns.Length)
+        while(a < _curQ.answers.Length)
         {
-            if (!_answerBttns[a].gameObject.activeSelf)
-            {
-                _answerBttns[a].gameObject.SetActive(true);
-                _answerBttns[a].gameObject.GetComponent<Animator>().SetTrigger("start");
-            }
-            else
-                _answerBttns[a].gameObject.GetComponent<Animator>().SetTrigger("start");
+            _answerBttns[a].gameObject.SetActive(true);
+            _answerBttns[a].gameObject.GetComponent<Animator>().SetTrigger("start");
 
             a++;
             yield return new WaitForSeconds(0.25f);
         }
 
-        for (int i = 0; i < _answerBttns.Length; i++)
+        for (int i = 0; i < _curQ.answers.Length; i++)
             _answerBttns[i].interactable = true;
 
         yield break;
@@ -156,9 +156,10 @@ public class GameScript : MonoBehaviour
 
         if (!isTrue)
         {
-            _answerBttns[_falseAnswerIndex].image.sprite = _falseAnswerBttnSprite;
             _answersText[_falseAnswerIndex].color = Color.red;
+            _answerBttns[_falseAnswerIndex].image.sprite = _falseAnswerBttnSprite;
             _answerBttns[_falseAnswerIndex].gameObject.GetComponent<Animator>().SetTrigger("wrong");
+
             yield return new WaitForSeconds(2);
         }
         else
@@ -173,6 +174,12 @@ public class GameScript : MonoBehaviour
             _answerBttns[i].gameObject.SetActive(false);
 
         QuestionGenerate();
+
+        Dictionary<string, object> parameters = new Dictionary<string, object>()
+            {
+                { "isCorrectAnswer", isTrue}
+            };
+        AnalyticsService.Instance.CustomData("questionAnswered", parameters);
     }
 
     public void GameEnd()
