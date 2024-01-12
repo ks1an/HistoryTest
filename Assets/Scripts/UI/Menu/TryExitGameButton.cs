@@ -5,7 +5,6 @@ public class TryExitGameButton : MonoBehaviour
     [SerializeField] private GameObject _backgroundExit;
     [SerializeField] private GameObject _panelExit;
 
-    private Animator _backroundAnim;
     private Animator _panelExitAnim;
 
     private void Awake()
@@ -16,7 +15,6 @@ public class TryExitGameButton : MonoBehaviour
         }
         else
         {
-            _backroundAnim = _backgroundExit.GetComponent<Animator>();
             _panelExitAnim = _panelExit.GetComponent<Animator>();
         }
     }
@@ -26,7 +24,6 @@ public class TryExitGameButton : MonoBehaviour
         _backgroundExit.SetActive(true);
         _panelExit.SetActive(true);
 
-        _backroundAnim.SetTrigger("In");
         _panelExitAnim.SetTrigger("In");
     }
 

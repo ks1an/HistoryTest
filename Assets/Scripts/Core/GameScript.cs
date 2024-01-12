@@ -9,6 +9,8 @@ using Unity.Services.Analytics;
 
 public class GameScript : MonoBehaviour
 {
+    public static bool CanExit = true;
+
     #region events
     public static event Action ActionGameStarted;
     public static event Action ActionGameEnded;
@@ -27,20 +29,28 @@ public class GameScript : MonoBehaviour
 
     [SerializeField] private QProgressBar _qProgressBar;
 
+    [SerializeField] private GameStats _stats;
+
     private List<object> _qList;
     private QuestionList _curQ;
     private int _randQ;
+
     private int _trueAnswerIndex;
     private int _falseAnswerIndex;
+
     private int _selectCategory = 0;
+
     private int _qLimit = 10;
     private int _qCounter = 0;
+
+    private int _correctAnswers = 0;
 
     public void OnClickPlay(int qLimit)
     {
         _qList = new List<object>(_category[_selectCategory].questions);
         _qLimit = qLimit;
         _qCounter = 0;
+        _correctAnswers = 0;
 
         for (int i = 0; i < _answerBttns.Length; i++)
             _answerBttns[i].gameObject.SetActive(false);
@@ -59,10 +69,13 @@ public class GameScript : MonoBehaviour
 
     private void QuestionGenerate()
     {
-        if(_qList.Count > 0 && _qCounter <= _qLimit)
-        {
-            ++_qCounter;
+        if (_qCounter > 0)
+            CanExit = false;
 
+        _qCounter++;
+
+        if (_qList.Count > 0 && _qCounter <= _qLimit)
+        {
             _trueAnswerIndex = -2;
             _falseAnswerIndex = -2;
 
@@ -91,8 +104,8 @@ public class GameScript : MonoBehaviour
         }
         else
         {
-            Debug.Log("Questions have ended or the limit has been reached! \n" 
-                + "qLimit: " + _qLimit + " qCounter: " + _qCounter + " qList.Count: " + _qList.Count);
+            /*Debug.Log("Questions have ended or the limit has been reached! \n" 
+                + "qLimit: " + _qLimit + " qCounter: " + _qCounter + " qList.Count: " + _qList.Count);*/
 
             GameEnd();
         }
@@ -160,11 +173,15 @@ public class GameScript : MonoBehaviour
             _answerBttns[_falseAnswerIndex].image.sprite = _falseAnswerBttnSprite;
             _answerBttns[_falseAnswerIndex].gameObject.GetComponent<Animator>().SetTrigger("wrong");
 
+            _qProgressBar.IncrementLack((float)_qLimit/100);
+
             yield return new WaitForSeconds(2);
         }
         else
         {
+            _correctAnswers++;
             _qProgressBar.IncrementProgress((float)_qLimit / 100);
+
             yield return new WaitForSeconds(1);
         }
 
@@ -184,6 +201,8 @@ public class GameScript : MonoBehaviour
 
     public void GameEnd()
     {
+        CanExit = true;
+        _stats.GetStatsOnGameEnd(--_qCounter, _correctAnswers);
         ActionGameEnded?.Invoke();
     }
 }

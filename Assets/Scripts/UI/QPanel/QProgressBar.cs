@@ -3,27 +3,43 @@ using UnityEngine.UI;
 
 public class QProgressBar : MonoBehaviour
 {
-    [SerializeField] private ParticleSystem _particleSys;
     [SerializeField] private float _fillSpeed = 0.5f;
+    [SerializeField] private ParticleSystem _particleSystemProgress;
+    [SerializeField] private ParticleSystem _particleSysLack;
+    [SerializeField] private Slider _sliderLack;
 
-    private Slider _slider;
+    private Slider _sliderProgress; 
     private float _curProgress = 0;
+    private float _curLack = 0;
 
     private void Awake()
     {
-        _slider = gameObject.GetComponent<Slider>();
+        _sliderProgress = gameObject.GetComponent<Slider>();
     }
 
     private void Update()
     {
-        if (_slider.value < _curProgress)
+        if (_sliderProgress.value < _curProgress)
         {
-            _slider.value += _fillSpeed * Time.deltaTime;
-            if(!_particleSys.isPlaying)
-                _particleSys.Play();
+            _sliderProgress.value += _fillSpeed * Time.deltaTime;
+            if(!_particleSystemProgress.isPlaying)
+                _particleSystemProgress.Play();
         }
         else
-            _particleSys.Stop();
+        {
+            _particleSystemProgress.Stop();
+        }
+
+        if (_sliderLack.value < _curLack)
+        {
+            _sliderLack.value += _fillSpeed * Time.deltaTime;
+            if (!_particleSysLack.isPlaying)
+                _particleSysLack.Play();
+        }
+        else
+        {
+            _particleSysLack.Stop();
+        }
     }
 
     public void AnimationOutEnded()
@@ -33,12 +49,20 @@ public class QProgressBar : MonoBehaviour
 
     public void IncrementProgress(float value)
     {
-        _curProgress = _slider.value + value;
+        _curProgress = _sliderProgress.value + value;
+    }
+
+    public void IncrementLack(float value)
+    {
+        _curLack  = _sliderLack.value + value;
     }
 
     private void OnDisable()
     {
         _curProgress = 0;
-        _slider.value = 0;
+        _sliderProgress.value = 0;
+
+        _curLack = 0;
+        _sliderLack.value = 0;
     }
 }

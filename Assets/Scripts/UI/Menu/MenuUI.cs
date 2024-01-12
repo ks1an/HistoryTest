@@ -6,13 +6,15 @@ public class MenuUI : MonoBehaviour
 
     private void OnEnable()
     {
+        QPanelUI.ActionQPanelExited += MenuEnable;
         qBackground.QuPanelAnimationInEnded += MenuDisable;
-        GameScript.ActionGameEnded += MenuEnable;
     }
+
+
     private void OnDisable()
     {
+        QPanelUI.ActionQPanelExited -= MenuEnable;
         qBackground.QuPanelAnimationInEnded -= MenuDisable;
-        GameScript.ActionGameEnded -= MenuEnable;
     }
 
     private void MenuEnable()
