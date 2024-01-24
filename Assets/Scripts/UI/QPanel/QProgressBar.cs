@@ -47,14 +47,30 @@ public class QProgressBar : MonoBehaviour
         gameObject.SetActive(false);
     }
 
-    public void IncrementProgress(float value)
+    public void SetMaxValue(int qLimit)
     {
-        _curProgress = _sliderProgress.value + value;
+        _sliderProgress.maxValue = (float)qLimit / 10;
+        _sliderLack.maxValue = (float)qLimit / 10;
     }
 
-    public void IncrementLack(float value)
+    public void IncrementProgress()
     {
-        _curLack  = _sliderLack.value + value;
+        _curProgress = _sliderProgress.value + 0.1f;
+
+        if (_curProgress > _sliderProgress.maxValue)
+        {
+            _curProgress = _sliderProgress.maxValue;
+        }
+    }
+
+    public void IncrementLack()
+    {
+        _curLack  = _sliderLack.value + 0.1f;
+
+        if (_curLack > _sliderLack.maxValue)
+        {
+            _curLack = _sliderLack.maxValue;
+        }
     }
 
     private void OnDisable()

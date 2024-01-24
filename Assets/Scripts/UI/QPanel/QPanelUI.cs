@@ -9,7 +9,7 @@ public class QPanelUI : MonoBehaviour
     [SerializeField] private GameObject _qCategoryName;
     [SerializeField] private GameObject _qProgressBar;
     [SerializeField] private GameObject _qStatsPanel;
-    [SerializeField] private GameObject _qWarningExitPanel;
+
 
     private void Start()
     {
@@ -36,7 +36,7 @@ public class QPanelUI : MonoBehaviour
 
         if (!GameScript.CanExit)
         {
-            _qWarningExitPanel.SetActive(true);
+            ModalWindowController.instance.ShowWarningExitToMenu();
         }
         else
         {
@@ -45,18 +45,11 @@ public class QPanelUI : MonoBehaviour
         }
     }
 
-    public void ExitOrConfirm(bool value)
+    public void ExitQPanel()
     {
-        if(value)
-        {
-            ActionQPanelExited.Invoke();
-            QPanelDisable();
-        }
-        else
-        {
-            _qWarningExitPanel.SetActive(false);
-            GameTimer.stop = false;
-        }
+        ActionQPanelExited.Invoke();
+        GameTimer.stop = false;
+        QPanelDisable();
     }
 
     private void QPanelEnable()
@@ -65,8 +58,6 @@ public class QPanelUI : MonoBehaviour
         _qPanel.GetComponent<Animator>().SetTrigger("in");
 
         _qStatsPanel.SetActive(false);
-
-        _qWarningExitPanel.SetActive(false);
 
         _qCategoryName.SetActive(true);
         _qCategoryName.GetComponent<Animator>().SetTrigger("in");

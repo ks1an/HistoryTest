@@ -61,19 +61,23 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\Core\UGS_Analytics.cs" />
-    <Compile Include="Assets\anim\BackgroundFocusPanel.cs" />
+    <Compile Include="Assets\Scripts\UI\UniversalUI\ModalWindow\ModalWindowPanel.cs" />
     <Compile Include="Assets\Scripts\UI\Menu\VersionTextUI.cs" />
+    <Compile Include="Assets\Scripts\BackgroundFocusPanel.cs" />
     <Compile Include="Assets\Scripts\Core\GameStats.cs" />
     <Compile Include="Assets\Scripts\UI\QPanel\QCategoryName.cs" />
     <Compile Include="Assets\Scripts\Core\GameTimer.cs" />
     <Compile Include="Assets\Scripts\RenderParticlesEffect.cs" />
     <Compile Include="Assets\Scripts\UI\QPanel\qPanelAnimToEvent.cs" />
+    <Compile Include="Assets\Scripts\UI\Menu\CategorySelect.cs" />
     <Compile Include="Assets\Scripts\UI\Menu\MenuUI.cs" />
+    <Compile Include="Assets\Scripts\UI\UniversalUI\ModalWindowController.cs" />
     <Compile Include="Assets\Scripts\UI\QPanel\QPanelUI.cs" />
     <Compile Include="Assets\Scripts\UI\QPanel\QStatsPanel.cs" />
     <Compile Include="Assets\Scripts\Core\GameScript.cs" />
     <Compile Include="Assets\Scripts\UI\Menu\TryExitGameButton.cs" />
     <Compile Include="Assets\Scripts\UI\QPanel\QProgressBar.cs" />
+    <Compile Include="Assets\Scripts\UI\UniversalUI\ModalWindow\HeroWindowTrigger.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />

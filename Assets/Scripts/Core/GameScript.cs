@@ -10,11 +10,11 @@ using Unity.Services.Analytics;
 public class GameScript : MonoBehaviour
 {
     public static bool CanExit = true;
-
-    #region events
     public static event Action ActionGameStarted;
     public static event Action ActionGameEnded;
-    #endregion
+
+    public CategoryList[] category => _category;
+
 
     [SerializeField] private CategoryList[] _category = new CategoryList[2];
     [SerializeField] private TextMeshProUGUI _qCategoryText; 
@@ -32,6 +32,7 @@ public class GameScript : MonoBehaviour
     [SerializeField] private GameStats _stats;
 
     private List<object> _qList;
+    private List<object> _qNotCorrectList;
     private QuestionList _curQ;
     private int _randQ;
 
@@ -45,19 +46,7 @@ public class GameScript : MonoBehaviour
 
     private int _correctAnswers = 0;
 
-    public void OnClickPlay(int qLimit)
-    {
-        _qList = new List<object>(_category[_selectCategory].questions);
-        _qLimit = qLimit;
-        _qCounter = 0;
-        _correctAnswers = 0;
-
-        for (int i = 0; i < _answerBttns.Length; i++)
-            _answerBttns[i].gameObject.SetActive(false);
-
-        QuestionGenerate();
-        ActionGameStarted?.Invoke();
-    }
+    private bool _isCorrectionQ;
 
     public void SelectCategory(int index)
     {
@@ -67,22 +56,78 @@ public class GameScript : MonoBehaviour
             _selectCategory = index;
     }
 
+    public void OnClickPlay(int qLimit)
+    {
+        _qList = new List<object>(_category[_selectCategory].questions);
+        _qNotCorrectList = new List<object>();
+
+        if (qLimit == 0)
+            _qLimit = _category[_selectCategory].questions.Length;
+        else
+            _qLimit = qLimit;
+
+        _qCounter = 0;
+        _correctAnswers = 0;
+        CanExit = true;
+
+        for (int i = 0; i < _answerBttns.Length; i++)
+            _answerBttns[i].gameObject.SetActive(false);
+
+        _qProgressBar.SetMaxValue(_qLimit);
+        QuestionGenerate();
+        ActionGameStarted?.Invoke();
+    }
+
     private void QuestionGenerate()
     {
+        if(_qCounter == 0)
+            _qCategoryText.text = _category[_selectCategory].nameOfCategory;
+
         if (_qCounter > 0)
             CanExit = false;
 
-        _qCounter++;
+        if(!_isCorrectionQ)
+            ++_qCounter;
 
         if (_qList.Count > 0 && _qCounter <= _qLimit)
         {
+            _isCorrectionQ = false;
             _trueAnswerIndex = -2;
             _falseAnswerIndex = -2;
 
             _randQ = Random.Range(0, _qList.Count);
+
             _curQ = _qList[_randQ] as QuestionList;
             _qText.text = _curQ.question;
-            _qCategoryText.text = _category[_selectCategory].nameOfCategory;
+
+            List<string> _answers = new List<string>(_curQ.answers);
+
+            for (int i = 0; i < _curQ.answers.Length; i++)
+            {
+                int rand = Random.Range(0, _answers.Count);
+                _answersText[i].text = _answers[rand];
+
+                if (_answersText[i].text.ToString() == _curQ.answers[0])
+                    _trueAnswerIndex = i;
+
+                _answerBttns[i].image.sprite = _defaultAnswerBttnSprite;
+                _answersText[i].color = Color.black;
+
+                _answers.RemoveAt(rand);
+            }
+
+            StartCoroutine(AnimBttns());
+        }
+        else if(_qNotCorrectList.Count > 0)
+        {
+            _isCorrectionQ = true;
+            _trueAnswerIndex = -2;
+            _falseAnswerIndex = -2;
+
+            _randQ = Random.Range(0, _qNotCorrectList.Count);
+
+            _curQ = _qNotCorrectList[_randQ] as QuestionList;
+            _qText.text = _curQ.question;
 
             List<string> _answers = new List<string>(_curQ.answers);
 
@@ -173,30 +218,58 @@ public class GameScript : MonoBehaviour
             _answerBttns[_falseAnswerIndex].image.sprite = _falseAnswerBttnSprite;
             _answerBttns[_falseAnswerIndex].gameObject.GetComponent<Animator>().SetTrigger("wrong");
 
-            _qProgressBar.IncrementLack((float)_qLimit/100);
-
+            if (!_isCorrectionQ)
+            {
+                _qProgressBar.IncrementLack();
+                _qNotCorrectList.Add(_qList[_randQ]);
+            }
             yield return new WaitForSeconds(2);
         }
         else
         {
-            _correctAnswers++;
-            _qProgressBar.IncrementProgress((float)_qLimit / 100);
+            _qProgressBar.IncrementProgress();
+
+            if(_isCorrectionQ)
+                _qNotCorrectList.RemoveAt(_randQ);
+            else
+                _correctAnswers++;
 
             yield return new WaitForSeconds(1);
         }
 
-        _qList.RemoveAt(_randQ);
+        if(!_isCorrectionQ)
+            _qList?.RemoveAt(_randQ);
 
         for (int i = 0; i < _answerBttns.Length; i++)
             _answerBttns[i].gameObject.SetActive(false);
 
         QuestionGenerate();
 
-        Dictionary<string, object> parameters = new Dictionary<string, object>()
+        #region Analytics
+        Dictionary<string, object> parametersAllAnswered = new Dictionary<string, object>()
             {
                 { "isCorrectAnswer", isTrue}
             };
-        AnalyticsService.Instance.CustomData("questionAnswered", parameters);
+        AnalyticsService.Instance.CustomData("questionAnswered", parametersAllAnswered);
+
+        if (!_isCorrectionQ)
+        {
+            Dictionary<string, object> parametersFirstPartAnswer = new Dictionary<string, object>()
+            {
+                { "isFirstPartCorrectAnswer", isTrue}
+            };
+            AnalyticsService.Instance.CustomData("questionAnswered", parametersFirstPartAnswer);
+        }
+        else
+        {
+            Dictionary<string, object> parametersSecondPartAnswer = new Dictionary<string, object>()
+            {
+                { "isSecondPartCorrectAnswer", isTrue}
+            };
+            AnalyticsService.Instance.CustomData("questionAnswered", parametersSecondPartAnswer);
+        }
+
+        #endregion
     }
 
     public void GameEnd()
