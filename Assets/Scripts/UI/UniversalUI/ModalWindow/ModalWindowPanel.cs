@@ -26,12 +26,12 @@ public class ModalWindowPanel : MonoBehaviour
 
     [Header("Footer")]
     [SerializeField] private Transform _footerArea;
-    [SerializeField] private Button _confirmButton, _alternateButton, _declineButton;
-    [SerializeField] private TextMeshProUGUI _confirmText, _alternateText, _declineText;
+    [SerializeField] private Button _alternateButton, _declineButton, _confirmButton;
+    [SerializeField] private TextMeshProUGUI _alternateText, _declineText, _confirmText;
 
-    private Action onConfirmAction, onAlternateAction, onDeclineAction;
+    private Action onAlternateAction, onDeclineAction, onConfirmAction;
 
-    public void ShowVertical(string title, Sprite imageToShow, string message, string confirmMessage, string declineMessage, string alternateMessage, Action confirmAction, Action declineAction, Action alternateAction = null)
+    public void ShowVertical(string title, Sprite imageToShow, string message, string confirmMessage, string declineMessage, string alternateMessage, Action confirmAction, Action declineAction = null, Action alternateAction = null)
     {
         if(imageToShow == null)
         {
@@ -51,6 +51,38 @@ public class ModalWindowPanel : MonoBehaviour
 
         _heroText.text = message;
 
+        _alternateButton.gameObject.SetActive(alternateAction != null);
+        _alternateText.text = alternateMessage;
+        onAlternateAction = alternateAction;
+
+        _declineButton.gameObject.SetActive(declineAction != null);
+        _declineText.text = declineMessage;
+        onDeclineAction = declineAction;
+
+        onConfirmAction = confirmAction;
+        _confirmText.text = confirmMessage;
+    }
+
+    public void ShowHorizontal(string title, Sprite imageToShow, string message, string confirmMessage, string declineMessage, string alternateMessage, Action confirmAction, Action declineAction, Action alternateAction = null)
+    {
+        if (imageToShow == null)
+        {
+            _iconContainer.gameObject.SetActive(false);
+        }
+        else
+        {
+            _iconContainer.gameObject.SetActive(true);
+            _iconImage.sprite = imageToShow;
+        }
+
+        _horizontalLayoutArea.gameObject.SetActive(true);
+        _verticalLayoutArea.gameObject.SetActive(false);
+
+        _headerArea.gameObject.SetActive(!string.IsNullOrEmpty(title));
+        _titleField.text = title;
+
+        _iconText.text = message;
+
         onConfirmAction = confirmAction;
         _confirmText.text = confirmMessage;
 
@@ -61,36 +93,6 @@ public class ModalWindowPanel : MonoBehaviour
         _alternateButton.gameObject.SetActive(alternateAction != null);
         _alternateText.text = alternateMessage;
         onAlternateAction = alternateAction;
-    }
-
-    public void ShowHorizontal(string title, Sprite imageToShow, string message, string confirmMessage, string declineMessage, string alternateMessage, Action confirmAction, Action declineAction, Action alternateAction = null)
-    {
-        if (imageToShow == null)
-            _iconContainer.gameObject.SetActive(false);
-        else
-            _iconContainer.gameObject.SetActive(true);
-
-        _horizontalLayoutArea.gameObject.SetActive(true);
-        _verticalLayoutArea.gameObject.SetActive(false);
-
-        _headerArea.gameObject.SetActive(!string.IsNullOrEmpty(title));
-        _titleField.text = title;
-
-        _iconImage.sprite = imageToShow;
-        _iconText.text = message;
-
-        onConfirmAction = confirmAction;
-        _confirmText.text = confirmMessage;
-
-        bool hasDecline = (declineAction != null);
-        _declineButton.gameObject.SetActive(hasDecline);
-        _declineText.text = declineMessage;
-        onDeclineAction = declineAction;
-
-        bool hasAlternate = (alternateAction != null);
-        _alternateButton.gameObject.SetActive(hasAlternate);
-        _alternateText.text = alternateMessage;
-        onAlternateAction = alternateAction;
 
     }
    
@@ -98,7 +100,7 @@ public class ModalWindowPanel : MonoBehaviour
 
     public void ShowVerticalNoChoice(string title, Sprite imageToShow, string message, Action confirmAction)
     {
-        ShowVertical(title, imageToShow, message, "Далее","","",confirmAction, null, null);
+        ShowVertical(title, imageToShow, message, "Далее","","", confirmAction, null, null);
     }
     public void ShowVerticalContinueOrBack(string title, Sprite imageToShow, string message, Action confirmAction, Action declineAction)
     {
@@ -107,6 +109,15 @@ public class ModalWindowPanel : MonoBehaviour
     public void ShowVerticalExitOrNot(string title, Sprite imageToShow, string message, Action confirmAction, Action declineAction)
     {
         ShowVertical(title, imageToShow, message, "Выйти", "Отмена", "", confirmAction, declineAction, null);
+    }
+
+    #endregion
+
+    #region Samples ShowHorizontal
+
+    public void ShowHorizontallNoChoice(string title, Sprite imageToShow, string message, Action confirmAction)
+    {
+        ShowHorizontal(title, imageToShow, message, "Далее", "", "", confirmAction, null, null);
     }
 
     #endregion
@@ -123,9 +134,9 @@ public class ModalWindowPanel : MonoBehaviour
     {
         onDeclineAction?.Invoke();
     }
-
     public void Close()
     {
+        GameTimer.stop = false;
         gameObject.SetActive(false);
     }
 }

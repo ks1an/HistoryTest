@@ -19,6 +19,7 @@ public class GameScript : MonoBehaviour
     [SerializeField] private CategoryList[] _category = new CategoryList[2];
     [SerializeField] private TextMeshProUGUI _qCategoryText; 
     [SerializeField] private Text _qText;
+    [SerializeField] private InterestFact _interestFactButton;
 
     [Header("Answer Buttons")]
     [SerializeField] private Button[] _answerBttns = new Button[4];
@@ -76,15 +77,14 @@ public class GameScript : MonoBehaviour
         _qProgressBar.SetMaxValue(_qLimit);
         QuestionGenerate();
         ActionGameStarted?.Invoke();
+
+        AnalyticsService.Instance.RecordEvent("IsRoundStarted");
     }
 
     private void QuestionGenerate()
     {
         if(_qCounter == 0)
             _qCategoryText.text = _category[_selectCategory].nameOfCategory;
-
-        if (_qCounter > 0)
-            CanExit = false;
 
         if(!_isCorrectionQ)
             ++_qCounter;
@@ -198,13 +198,20 @@ public class GameScript : MonoBehaviour
         if (_trueAnswerIndex == -2)
         {
             Debug.LogError("the index of the correct answer button was not received");
+            _qCounter--;
+            QuestionGenerate();
             yield break;
         }
         if (_falseAnswerIndex == -2)
         {
             Debug.LogError("the index of the button pressed incorrectly was not received");
+            _qCounter--;
+            QuestionGenerate();
             yield break;
         }
+
+        if (_qCounter > 0)
+            CanExit = false;
 
         for (int i = 0; i < _answerBttns.Length; i++)
             _answerBttns[i].interactable = false;
@@ -212,6 +219,7 @@ public class GameScript : MonoBehaviour
         _answersText[_trueAnswerIndex].color = Color.green;
         _answerBttns[_trueAnswerIndex].image.sprite = _trueAnswerBttnSprite;
 
+        float a = 0;
         if (!isTrue)
         {
             _answersText[_falseAnswerIndex].color = Color.red;
@@ -223,7 +231,7 @@ public class GameScript : MonoBehaviour
                 _qProgressBar.IncrementLack();
                 _qNotCorrectList.Add(_qList[_randQ]);
             }
-            yield return new WaitForSeconds(2);
+            a += 2f;
         }
         else
         {
@@ -233,40 +241,54 @@ public class GameScript : MonoBehaviour
                 _qNotCorrectList.RemoveAt(_randQ);
             else
                 _correctAnswers++;
-
-            yield return new WaitForSeconds(1);
+            a += 1f;
         }
 
         if(!_isCorrectionQ)
             _qList?.RemoveAt(_randQ);
 
+        if (_curQ.qFactsList.nameOfFact != "")
+        {
+            _interestFactButton.gameObject.SetActive(true);
+            _interestFactButton.Enable();
+            a += 1f;
+        }
+
+        yield return new WaitForSeconds(a);
+
+        while (GameTimer.stop)
+            yield return new WaitForSeconds(0.25f);
+
         for (int i = 0; i < _answerBttns.Length; i++)
             _answerBttns[i].gameObject.SetActive(false);
+
+        if(_interestFactButton.isActiveAndEnabled)
+            _interestFactButton?.OutAnimation();
 
         QuestionGenerate();
 
         #region Analytics
-        Dictionary<string, object> parametersAllAnswered = new Dictionary<string, object>()
+        CustomEvent parametersAllAnswered = new CustomEvent("questionAnswered")
             {
                 { "isCorrectAnswer", isTrue}
             };
-        AnalyticsService.Instance.CustomData("questionAnswered", parametersAllAnswered);
+        AnalyticsService.Instance.RecordEvent(parametersAllAnswered);
 
         if (!_isCorrectionQ)
         {
-            Dictionary<string, object> parametersFirstPartAnswer = new Dictionary<string, object>()
+            CustomEvent parametersFirstPartAnswer = new CustomEvent("questionAnswered")
             {
                 { "isFirstPartCorrectAnswer", isTrue}
             };
-            AnalyticsService.Instance.CustomData("questionAnswered", parametersFirstPartAnswer);
+            AnalyticsService.Instance.RecordEvent(parametersFirstPartAnswer);
         }
         else
         {
-            Dictionary<string, object> parametersSecondPartAnswer = new Dictionary<string, object>()
+            CustomEvent parametersSecondPartAnswer = new CustomEvent("questionAnswered")
             {
                 { "isSecondPartCorrectAnswer", isTrue}
             };
-            AnalyticsService.Instance.CustomData("questionAnswered", parametersSecondPartAnswer);
+            AnalyticsService.Instance.RecordEvent(parametersSecondPartAnswer);
         }
 
         #endregion
@@ -277,6 +299,12 @@ public class GameScript : MonoBehaviour
         CanExit = true;
         _stats.GetStatsOnGameEnd(--_qCounter, _correctAnswers);
         ActionGameEnded?.Invoke();
+        AnalyticsService.Instance.RecordEvent("IsRoundEnded");
+    }
+
+    public void ShowInterestFact()
+    {
+        ModalWindowController.instance.ShowInterestFact(_curQ.qFactsList.nameOfFact, _curQ.qFactsList.image, _curQ.qFactsList.textMessage);
     }
 }
 
@@ -285,6 +313,15 @@ public class QuestionList
 {
     public string question;
     public string[] answers = new string[4];
+    public InterestFactList qFactsList;
+}
+
+[System.Serializable]
+public class InterestFactList
+{
+    public string nameOfFact;
+    public Sprite image;
+    public string textMessage;
 }
 
 [System.Serializable]

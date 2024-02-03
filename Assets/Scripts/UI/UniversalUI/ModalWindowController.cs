@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class ModalWindowController : MonoBehaviour
 {
@@ -17,13 +18,20 @@ public class ModalWindowController : MonoBehaviour
         _qPanel = GetComponent<QPanelUI>();
     }
 
+    public void ShowInterestFact(string title, Sprite image, string message)
+    {
+        GameTimer.stop = true;
+        _modalWindow.gameObject.SetActive(true);
+        _modalWindow.ShowHorizontallNoChoice(title, image, message, CloseInGame);
+    }
     public void ShowSelectCategoryPanel(string title, string nameCategory, string categoryMessage, Action confirm, Action decline, Action alt)
     {
         _modalWindow.gameObject.SetActive(true);
-        _modalWindow.ShowVertical($"Выберите категорию вопросов {title}", null, $"{nameCategory}\n{categoryMessage}", "Следующая", "Выбрать", "Предыдущая", decline, confirm, alt);
+        _modalWindow.ShowVertical($"Выберите категорию вопросов {title}", null, $"{nameCategory}\n{categoryMessage}", "Выбрать", "Следующая", "Предыдущая", confirm, decline, alt);
     }
     public void ShowWarningExitToMenu()
     {
+        GameTimer.stop = true;
         _modalWindow.gameObject.SetActive(true);
         _modalWindow.ShowVerticalExitOrNot("Внимание!", null, "Вы уверены, что хотите выйти в меню?\n(Весь прогресс за раунд будет утрачен!)", ConfirmExitToMenu, Close);
     }
@@ -32,6 +40,12 @@ public class ModalWindowController : MonoBehaviour
         _modalWindow.gameObject.SetActive(true);
         _modalWindow.ShowVerticalExitOrNot("", null, "Вы уверены, что хотите выйти?", QuitGame, Close);
     }
+    public void CloseInGame()
+    {
+        GameTimer.stop = false;
+        _modalWindow.Close();
+    }
+
     public void Close()
     {
         _modalWindow.Close();

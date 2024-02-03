@@ -7,15 +7,10 @@ public class QProgressBar : MonoBehaviour
     [SerializeField] private ParticleSystem _particleSystemProgress;
     [SerializeField] private ParticleSystem _particleSysLack;
     [SerializeField] private Slider _sliderLack;
+    [SerializeField] private Slider _sliderProgress; 
 
-    private Slider _sliderProgress; 
     private float _curProgress = 0;
     private float _curLack = 0;
-
-    private void Awake()
-    {
-        _sliderProgress = gameObject.GetComponent<Slider>();
-    }
 
     private void Update()
     {
