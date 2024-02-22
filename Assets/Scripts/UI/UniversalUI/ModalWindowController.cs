@@ -1,6 +1,5 @@
 using System;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class ModalWindowController : MonoBehaviour
 {
@@ -17,6 +16,7 @@ public class ModalWindowController : MonoBehaviour
         instance = this;
         _qPanel = GetComponent<QPanelUI>();
     }
+    #region QPanel
 
     public void ShowInterestFact(string title, Sprite image, string message)
     {
@@ -24,21 +24,39 @@ public class ModalWindowController : MonoBehaviour
         _modalWindow.gameObject.SetActive(true);
         _modalWindow.ShowHorizontallNoChoice(title, image, message, CloseInGame);
     }
-    public void ShowSelectCategoryPanel(string title, string nameCategory, string categoryMessage, Action confirm, Action decline, Action alt)
-    {
-        _modalWindow.gameObject.SetActive(true);
-        _modalWindow.ShowVertical($"Выберите категорию вопросов {title}", null, $"{nameCategory}\n{categoryMessage}", "Выбрать", "Следующая", "Предыдущая", confirm, decline, alt);
-    }
     public void ShowWarningExitToMenu()
     {
         GameTimer.stop = true;
         _modalWindow.gameObject.SetActive(true);
         _modalWindow.ShowVerticalExitOrNot("Внимание!", null, "Вы уверены, что хотите выйти в меню?\n(Весь прогресс за раунд будет утрачен!)", ConfirmExitToMenu, Close);
     }
-    public void ShowQuitConfirm()
+
+    #endregion
+
+    #region Menu
+
+    public void ShowSelectCategoryPanel(string title, string nameCategory, string categoryMessage, Action confirm, Action decline, Action alt)
     {
         _modalWindow.gameObject.SetActive(true);
-        _modalWindow.ShowVerticalExitOrNot("", null, "Вы уверены, что хотите выйти?", QuitGame, Close);
+        _modalWindow.ShowVertical($"Выберите категорию вопросов {title}", null, $"{nameCategory}\n{categoryMessage}", "Выбрать", "Следующая", "Предыдущая", confirm, decline, alt);
+    }
+
+    public void ShowAboutAutor()
+    {
+        _modalWindow.gameObject.SetActive(true);
+        _modalWindow.ShowHorizontallNoChoice("Об авторе", null, "History Quiz: World Wars © 2024 by Unura company, developer: Yusupov \"ks1an\" is licensed under CC BY-ND 4.0 \n Resources used:\n " +
+            "Information on the First World War taken from: wikipedia\n" +
+            "Information on World War II taken from: ushmm\n" +
+            "The game logo is based on: freepik(author: Muhammad Ali)"
+            , Close);
+    }
+
+    #endregion
+
+    public void ShowQuitConfirm(Action confirmAction)
+    {
+        _modalWindow.gameObject.SetActive(true);
+        _modalWindow.ShowVerticalExitOrNot("", null, "Вы уверены, что хотите выйти?", confirmAction, Close);
     }
     public void CloseInGame()
     {
@@ -56,10 +74,4 @@ public class ModalWindowController : MonoBehaviour
         _qPanel.ExitQPanel();
         Close();
     }
-
-    void QuitGame()
-    {
-        Application.Quit();
-    }
-
 }

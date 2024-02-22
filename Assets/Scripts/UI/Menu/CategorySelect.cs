@@ -1,11 +1,26 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class CategorySelect : MonoBehaviour
 {
     [SerializeField] private GameScript _gameScript;
 
     private int _categoryCounter;
+    private Button _button;
 
+    private void Awake()
+    {
+        _button = GetComponent<Button>();
+    }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            if (_button.gameObject.activeSelf)
+                _button.onClick.Invoke();
+        }
+    }
     public void StartSelectCategory()
     {
         _categoryCounter = 0;
@@ -14,7 +29,7 @@ public class CategorySelect : MonoBehaviour
 
     public void NextCategory()
     {
-        if (_categoryCounter >= _gameScript.category.Length - 1)
+        if (_categoryCounter >= _gameScript.Category.Length - 1)
             _categoryCounter = 0;
         else
             _categoryCounter++;
@@ -24,7 +39,7 @@ public class CategorySelect : MonoBehaviour
     public void PreviousCategory()
     {
         if (_categoryCounter <= 0)
-            _categoryCounter = _gameScript.category.Length - 1;
+            _categoryCounter = _gameScript.Category.Length - 1;
         else
             _categoryCounter--;
 
@@ -32,7 +47,7 @@ public class CategorySelect : MonoBehaviour
     }
     private void SelectCategory()
     {
-        ModalWindowController.instance.ShowSelectCategoryPanel($"({_categoryCounter + 1} из {_gameScript.category.Length})", _gameScript.category[_categoryCounter].nameOfCategory, "", ConfirmSelectCategory, NextCategory, PreviousCategory);
+        ModalWindowController.instance.ShowSelectCategoryPanel($"({_categoryCounter + 1} из {_gameScript.Category.Length})", _gameScript.Category[_categoryCounter].nameOfCategory, "", ConfirmSelectCategory, NextCategory, PreviousCategory);
     }
 
     private void ConfirmSelectCategory()

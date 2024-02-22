@@ -31,6 +31,21 @@ public class ModalWindowPanel : MonoBehaviour
 
     private Action onAlternateAction, onDeclineAction, onConfirmAction;
 
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.A))
+        {
+            onAlternateAction?.Invoke();
+        }
+        else if(Input.GetKeyDown(KeyCode.D))
+        {
+            onDeclineAction?.Invoke();
+        }
+        else if(Input.GetKeyDown(KeyCode.W))
+        {
+            onConfirmAction?.Invoke();
+        }
+    }
     public void ShowVertical(string title, Sprite imageToShow, string message, string confirmMessage, string declineMessage, string alternateMessage, Action confirmAction, Action declineAction = null, Action alternateAction = null)
     {
         if(imageToShow == null)

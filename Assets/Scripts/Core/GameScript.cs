@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using TMPro;
 using Random = UnityEngine.Random;
 using Unity.Services.Analytics;
+using YG;
 
 public class GameScript : MonoBehaviour
 {
@@ -13,12 +14,12 @@ public class GameScript : MonoBehaviour
     public static event Action ActionGameStarted;
     public static event Action ActionGameEnded;
 
-    public CategoryList[] category => _category;
+    public CategoryList[] Category => _category;
 
 
     [SerializeField] private CategoryList[] _category = new CategoryList[2];
     [SerializeField] private TextMeshProUGUI _qCategoryText; 
-    [SerializeField] private Text _qText;
+    [SerializeField] private TextMeshProUGUI _qText;
     [SerializeField] private InterestFact _interestFactButton;
 
     [Header("Answer Buttons")]
@@ -78,7 +79,11 @@ public class GameScript : MonoBehaviour
         QuestionGenerate();
         ActionGameStarted?.Invoke();
 
-        AnalyticsService.Instance.RecordEvent("IsRoundStarted");
+        CustomEvent roundStartEvent = new CustomEvent("IsRoundStarted")
+        {
+             { "gameCategory", _category[_selectCategory].nameOfCategory },
+        };
+        AnalyticsService.Instance.RecordEvent(roundStartEvent);
     }
 
     private void QuestionGenerate()
@@ -149,9 +154,6 @@ public class GameScript : MonoBehaviour
         }
         else
         {
-            /*Debug.Log("Questions have ended or the limit has been reached! \n" 
-                + "qLimit: " + _qLimit + " qCounter: " + _qCounter + " qList.Count: " + _qList.Count);*/
-
             GameEnd();
         }
     }
@@ -265,12 +267,11 @@ public class GameScript : MonoBehaviour
         if(_interestFactButton.isActiveAndEnabled)
             _interestFactButton?.OutAnimation();
 
-        QuestionGenerate();
-
         #region Analytics
         CustomEvent parametersAllAnswered = new CustomEvent("questionAnswered")
             {
-                { "isCorrectAnswer", isTrue}
+                { "isCorrectAnswer", isTrue },
+                {"nameQ",  _curQ.question}
             };
         AnalyticsService.Instance.RecordEvent(parametersAllAnswered);
 
@@ -292,14 +293,24 @@ public class GameScript : MonoBehaviour
         }
 
         #endregion
+
+        QuestionGenerate();
     }
 
     public void GameEnd()
     {
+        YandexGame.FullscreenShow();
+
         CanExit = true;
-        _stats.GetStatsOnGameEnd(--_qCounter, _correctAnswers);
+        _stats.GetStatsOnGameEnd(_qCounter - 1, _correctAnswers);
         ActionGameEnded?.Invoke();
-        AnalyticsService.Instance.RecordEvent("IsRoundEnded");
+
+        CustomEvent roundEndedEvent = new CustomEvent("IsRoundEnded")
+        {
+             { "gameCategory", _category[_selectCategory].nameOfCategory },
+             { "gameTimeEnd", GameStats.timeRound},
+        };
+        AnalyticsService.Instance.RecordEvent(roundEndedEvent);
     }
 
     public void ShowInterestFact()

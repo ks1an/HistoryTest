@@ -17,7 +17,7 @@ public class QStatsPanel : MonoBehaviour
 
     private void Update()
     {
-        if(_currentAccuracyAmount < GameStats.accuracyRound)
+        if (_currentAccuracyAmount < GameStats.accuracyRound)
         {
             _currentAccuracyAmount += 100 * Time.deltaTime;
             _accuracyText.text = Convert.ToInt16(_currentAccuracyAmount).ToString() + "%";
